@@ -7,11 +7,26 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: 'com.squareup.wire'
+
+wire {
+    kotlin {
+        javaInterop = true
+    }
+}
 
 dependencies {
     api project(':play-services-tapandpay')
 
     implementation project(':play-services-base-core')
+    implementation project(':play-services-droidguard')
+    implementation project(':play-services-tasks-ktx')
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation "com.squareup.wire:wire-runtime:$wireVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
+    testImplementation 'junit:junit:4.13.2'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"

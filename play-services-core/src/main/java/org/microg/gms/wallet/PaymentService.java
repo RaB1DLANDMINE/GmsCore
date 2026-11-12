@@ -26,6 +26,7 @@ import com.google.android.gms.common.internal.IGmsCallbacks;
 
 import org.microg.gms.BaseService;
 import org.microg.gms.common.GmsService;
+import org.microg.gms.common.PackageUtils;
 
 public class PaymentService extends BaseService {
 
@@ -46,8 +47,10 @@ public class PaymentService extends BaseService {
 
     @Override
     public void handleServiceRequest(IGmsCallbacks callback, GetServiceRequest request, GmsService service) throws RemoteException {
+        String packageName = PackageUtils.getAndCheckCallingPackage(this, request.packageName);
+        if (packageName == null) throw new IllegalArgumentException("Missing package name");
         ConnectionInfo connectionInfo = new ConnectionInfo();
         connectionInfo.features = FEATURES;
-        callback.onPostInitCompleteWithConnectionInfo(CommonStatusCodes.SUCCESS, new OwServiceImpl(this), connectionInfo);
+        callback.onPostInitCompleteWithConnectionInfo(CommonStatusCodes.SUCCESS, new OwServiceImpl(this, packageName), connectionInfo);
     }
 }

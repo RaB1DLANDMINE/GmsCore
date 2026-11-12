@@ -12,5 +12,16 @@
                 <action android:name="com.google.android.gms.tapandpay.service.BIND"/>
             </intent-filter>
         </service>
+
+        <activity
+            android:name="org.microg.gms.tapandpay.tokenization.TokenizePanActivity"
+            android:exported="false"
+            android:process=":ui">
+            <intent-filter>
+                <action android:name="com.google.android.gms.tapandpay.ACTION_TOKENIZE_PAN"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

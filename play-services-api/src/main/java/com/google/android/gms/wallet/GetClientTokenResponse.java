@@ -15,6 +15,15 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelableCreatorAn
 
 @SafeParcelable.Class
 public class GetClientTokenResponse extends AbstractSafeParcelable {
+    @Field(2)
+    public byte[] token = new byte[0];
+
+    public GetClientTokenResponse() {
+    }
+
+    public GetClientTokenResponse(byte[] token) {
+        this.token = token;
+    }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {

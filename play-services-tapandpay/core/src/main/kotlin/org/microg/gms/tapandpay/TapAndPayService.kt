@@ -5,7 +5,10 @@
 package org.microg.gms.tapandpay
 
 import android.app.KeyguardManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcel
@@ -20,8 +23,8 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.internal.ConnectionInfo
 import com.google.android.gms.common.internal.GetServiceRequest
 import com.google.android.gms.common.internal.IGmsCallbacks
+import com.google.android.gms.common.internal.safeparcel.SafeParcelableSerializer
 import com.google.android.gms.tapandpay.TapAndPayStatusCodes.TAP_AND_PAY_NO_ACTIVE_WALLET
-import com.google.android.gms.tapandpay.firstparty.AccountInfo
 import com.google.android.gms.tapandpay.firstparty.GetActiveAccountResponse
 import com.google.android.gms.tapandpay.firstparty.GetAllCardsResponse
 import com.google.android.gms.tapandpay.firstparty.GetSecurityParamsResponse
@@ -33,6 +36,7 @@ import com.google.android.gms.tapandpay.firstparty.RegisterServiceListenerReques
 import com.google.android.gms.tapandpay.internal.ITapAndPayService
 import com.google.android.gms.tapandpay.internal.ITapAndPayServiceCallbacks
 import com.google.android.gms.tapandpay.internal.firstparty.GetActiveAccountRequest
+import com.google.android.gms.tapandpay.internal.firstparty.FirstPartyTokenizePanRequest
 import com.google.android.gms.tapandpay.internal.firstparty.GetAllCardsRequest
 import com.google.android.gms.tapandpay.internal.firstparty.IsDeviceUnlockedForPaymentRequest
 import com.google.android.gms.tapandpay.internal.firstparty.RefreshSeCardsRequest
@@ -40,6 +44,7 @@ import com.google.android.gms.tapandpay.internal.firstparty.SetActiveAccountRequ
 import com.google.android.gms.tapandpay.internal.firstparty.SetSelectedTokenRequest
 import com.google.android.gms.tapandpay.issuer.ListTokensRequest
 import com.google.android.gms.tapandpay.issuer.PushTokenizeRequest
+import org.microg.gms.tapandpay.tokenization.TokenizePanActivity
 import org.microg.gms.BaseService
 import org.microg.gms.common.GmsService
 import org.microg.gms.common.GooglePackagePermission
@@ -47,6 +52,7 @@ import org.microg.gms.common.PackageUtils
 import org.microg.gms.utils.ExtendedPackageInfo
 import org.microg.gms.utils.toBase64
 import org.microg.gms.utils.warnOnTransactionIssues
+import java.util.UUID
 
 private const val TAG = "GmsTapAndPay"
 
@@ -119,9 +125,6 @@ class TapAndPayImpl(private val context: Context, private val packageName: Strin
     private val isFirstParty
         get() = ExtendedPackageInfo(context, packageName).hasGooglePackagePermission(GooglePackagePermission.WALLET)
 
-    private var accountId: String? = null
-    private var accountName: String? = null
-
     override fun setSelectedToken(request: SetSelectedTokenRequest?, callbacks: ITapAndPayServiceCallbacks?, apiMetadata: ApiMetadata?) {
         if (!isFirstParty) {
             callbacks?.onSetSelectedTokenResponse(Status.INTERNAL_ERROR)
@@ -141,10 +144,11 @@ class TapAndPayImpl(private val context: Context, private val packageName: Strin
             callbacks?.onSetActiveAccountResponse(Status.INTERNAL_ERROR)
             return
         }
-        Log.d(TAG, "setActiveAccount(${request?.accountName})")
-        this.accountId = request?.accountName // TODO: Get actual account id
-        this.accountName = request?.accountName
-        callbacks?.onSetActiveAccountResponse(Status.SUCCESS)
+        val selected = request?.accountName?.let { name ->
+            WalletStateStore(context).use { it.selectAccount(name) }
+        } == true
+        callbacks?.onSetActiveAccountResponse(if (selected) Status.SUCCESS
+            else Status(CommonStatusCodes.INVALID_ACCOUNT, "Google account is unavailable"))
     }
 
     override fun getActiveAccount(request: GetActiveAccountRequest?, callbacks: ITapAndPayServiceCallbacks?, metadata: ApiMetadata?) {
@@ -152,8 +156,7 @@ class TapAndPayImpl(private val context: Context, private val packageName: Strin
             callbacks?.onGetActiveAccountResponse(Status.INTERNAL_ERROR, null)
             return
         }
-        val accountInfo = accountId?.let { AccountInfo(accountId, accountName, 1) }
-        Log.d(TAG, "getActiveAccount() = $accountInfo")
+        val accountInfo = WalletStateStore(context).use { it.accountInfo() }
         callbacks?.onGetActiveAccountResponse(Status.SUCCESS, GetActiveAccountResponse(accountInfo))
     }
 
@@ -172,8 +175,9 @@ class TapAndPayImpl(private val context: Context, private val packageName: Strin
     }
 
     override fun getActiveWalletId(callbacks: ITapAndPayServiceCallbacks, metadata: ApiMetadata?) {
-        Log.d(TAG, "getActiveWalletId: ")
-        callbacks.onGetActiveWalletIdResponse(Status(TAP_AND_PAY_NO_ACTIVE_WALLET), "")
+        val walletId = WalletStateStore(context).use { store -> store.activeAccount()?.let(store::walletId) }
+        callbacks.onGetActiveWalletIdResponse(if (walletId != null) Status.SUCCESS
+            else Status(TAP_AND_PAY_NO_ACTIVE_WALLET), walletId.orEmpty())
     }
 
     override fun getTokenStatus(tokenProvider: Int, issuerTokenId: String, callbacks: ITapAndPayServiceCallbacks, metadata: ApiMetadata?) {
@@ -187,8 +191,8 @@ class TapAndPayImpl(private val context: Context, private val packageName: Strin
     }
 
     override fun createWallet(callbacks: ITapAndPayServiceCallbacks?, apiMetadata: ApiMetadata?) {
-        Log.d(TAG, "Not yet implemented: createWallet")
-        callbacks?.onHandleStatusPendingIntent(Status(CommonStatusCodes.RESOLUTION_REQUIRED, null, ), Bundle.EMPTY)
+        callbacks?.onHandleStatusPendingIntent(
+            Status(CommonStatusCodes.RESOLUTION_REQUIRED, null, setupResolution(null)), Bundle.EMPTY)
     }
 
     override fun getStableHardwareId(callbacks: ITapAndPayServiceCallbacks, metadata: ApiMetadata?) {
@@ -222,6 +226,39 @@ class TapAndPayImpl(private val context: Context, private val packageName: Strin
         }
         Log.d(TAG, "Not yet implemented: tokenization(${data?.toBase64(Base64.NO_WRAP)})")
         callbacks?.onByteArray(Status(CommonStatusCodes.DEVELOPER_ERROR, "Unimplemented"), byteArrayOf())
+    }
+
+    override fun firstPartyTokenizePan(request: FirstPartyTokenizePanRequest?, callbacks: ITapAndPayServiceCallbacks?, apiMetadata: ApiMetadata?) {
+        if (!isFirstParty) {
+            callbacks?.onHandleStatusPendingIntent(Status.INTERNAL_ERROR, null)
+            return
+        }
+        if (request == null) {
+            callbacks?.onHandleStatusPendingIntent(Status(CommonStatusCodes.DEVELOPER_ERROR, "Missing request"), Bundle.EMPTY)
+            return
+        }
+        callbacks?.onHandleStatusPendingIntent(
+            Status(CommonStatusCodes.RESOLUTION_REQUIRED, null, setupResolution(request)), Bundle.EMPTY)
+    }
+
+    private fun setupResolution(request: FirstPartyTokenizePanRequest?): PendingIntent {
+        val selected = WalletStateStore(context).use { it.accountInfo() }
+        val intent = Intent(context, TokenizePanActivity::class.java).apply {
+            action = TokenizePanActivity.ACTION
+            // PendingIntent identity excludes extras. Isolate each request instead of replacing
+            // another caller's account/card context with FLAG_UPDATE_CURRENT.
+            data = Uri.parse("microg-wallet://setup/${UUID.randomUUID()}")
+            putExtra(TokenizePanActivity.EXTRA_CALLING_PACKAGE, packageName)
+            putExtra(TokenizePanActivity.EXTRA_ACCOUNT_NAME, selected?.accountName)
+            putExtra("extra_account_info", SafeParcelableSerializer.serializeToBytes(selected))
+            request?.let {
+                putExtra(TokenizePanActivity.EXTRA_CLIENT_TOKEN_ID, it.clientTokenId)
+                putExtra(TokenizePanActivity.EXTRA_ENTRY_POINT, it.entryPoint)
+                putExtra(TokenizePanActivity.EXTRA_WALLET_ID, it.walletId)
+                putExtra("org.microg.gms.tapandpay.TOKENIZATION_REQUEST", it)
+            }
+        }
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     override fun registerServiceListener(request: RegisterServiceListenerRequest?, callbacks: ITapAndPayServiceCallbacks?, apiMetadata: ApiMetadata?) {

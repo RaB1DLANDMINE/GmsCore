@@ -13,6 +13,7 @@
             <intent-filter>
                 <action android:name="com.google.android.gms.pay.PAY" />
                 <action android:name="com.google.android.gms.pay.PAY_OPTIONAL" />
+                <action android:name="com.google.android.gms.pay.homescreen.additem.ADD_PAYMENT_METHOD" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

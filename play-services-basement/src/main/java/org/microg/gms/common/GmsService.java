@@ -377,7 +377,7 @@ public enum GmsService {
     MULTIDEVICE_API_PROFILE(356),
     DATA_COMPLIANCE(357),
     NOTIFICATIONS_REGISTRATION(358),
-    SERVICE_ENTITLEMENT(359),
+    SERVICE_ENTITLEMENT(359, "com.google.android.gms.serviceentitlement.service.ServiceEntitlementChimeraService.START"),
     CASTAUTH(360),
     BLINDAUTH(361),
     MLKIT_DOCSCAN_UI(362),

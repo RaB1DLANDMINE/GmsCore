@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: 2026 microG Project Team
+// SPDX-License-Identifier: Apache-2.0
+syntax = "proto2";
+package org.microg.gms.tapandpay.backend.proto;
+
+// Recovered from GMS 26.44.32 protobuf-lite message-info strings. Names are
+// descriptive microG names, not claims about the original proto identifiers.
+// Unrecovered nested messages are bytes (identical length-delimited wire type).
+
+// defpackage.jndp (google.protobuf.Any)
+message Payload {
+    optional string type_url = 1;
+    optional bytes body = 2;
+}
+
+// iysp / iysr
+message RequestEnvelope {
+    optional RequestContext context = 1;
+    optional Payload payload = 2;
+}
+message ResponseEnvelope {
+    optional ResponseContext context = 1;
+    optional Payload payload = 2;
+}
+
+// iyso. Fields 7, 8 and 9 (capabilities/modules) are not needed by this client yet.
+message RequestContext {
+    optional int64 android_id = 1;
+    optional ClientInfo client = 2;
+    optional ClientInfo calling_client = 3;
+    optional int32 platform = 6;
+    optional int64 proxy_android_id = 10;
+    optional string session_id = 11;
+    optional int32 request_source = 12;
+    optional DeviceInfo device = 13;
+}
+// iysl / iysk
+message ClientInfo {
+    optional string package_name = 1;
+    optional string version_code = 2;
+    optional string version_name = 3;
+    optional int32 client_type = 4;
+}
+message DeviceInfo {
+    optional string manufacturer = 1;
+    optional string model = 2;
+    optional int64 sdk = 3;
+    optional string release = 4;
+    optional string build_id = 5;
+}
+// iysq / iyju. These are not google.rpc.Status (the field layout differs).
+message ResponseContext {
+    optional BackendError error = 1;
+    optional int64 server_time = 2;
+}
+message BackendError {
+    optional int32 code = 1;
+    optional string field2 = 2;
+    optional string field3 = 3;
+    repeated Payload details = 4;
+    optional string field5 = 5;
+}
+
+// iysw / iyks are both empty.
+message EmptyRequest {}
+// iysy: numeric 2 is the condition tested by gnkw.b; other enum meanings unknown.
+message AccountEnablementResponse {
+    optional int32 status = 1;
+}
+// iykt. String semantics remain neutral until the returned content is observed.
+message TermsResponse {
+    optional string field1 = 1;
+    optional int32 field2 = 2;
+    optional int32 field3 = 3;
+    optional string field4 = 4;
+}
+// iyml / iymm. Do not invent SE registration parameters from gncx.q: that call
+// is for managed secure elements and is not evidence for phone HCE registration.
+message RegisterWalletRequest {
+    optional string field2 = 2;
+    optional string field3 = 3;
+    optional string field4 = 4;
+    optional bytes secure_element = 5;
+    optional bytes field6 = 6;
+    optional int32 field8 = 8;
+}
+message RegisterWalletResponse {
+    optional string wallet_id = 1;
+    optional string field2 = 2;
+    optional bytes field3 = 3;
+    optional int64 field4 = 4;
+    optional string field5 = 5;
+}

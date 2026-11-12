@@ -5,6 +5,7 @@ import com.google.android.gms.tapandpay.firstparty.IsDeviceRecentlyUnlockedReque
 import com.google.android.gms.tapandpay.firstparty.LogUserCurrentScreenRequest;
 import com.google.android.gms.tapandpay.firstparty.RegisterServiceListenerRequest;
 import com.google.android.gms.tapandpay.internal.ITapAndPayServiceCallbacks;
+import com.google.android.gms.tapandpay.internal.firstparty.FirstPartyTokenizePanRequest;
 import com.google.android.gms.tapandpay.internal.firstparty.GetActiveAccountRequest;
 import com.google.android.gms.tapandpay.internal.firstparty.GetAllCardsRequest;
 import com.google.android.gms.tapandpay.internal.firstparty.RefreshSeCardsRequest;
@@ -18,7 +19,7 @@ interface ITapAndPayService {
     void setSelectedToken(in SetSelectedTokenRequest request, ITapAndPayServiceCallbacks callbacks, in ApiMetadata apiMetadata) = 0;
     void getAllCards(in GetAllCardsRequest request, ITapAndPayServiceCallbacks callbacks, in ApiMetadata apiMetadata) = 1;
 //    void deleteToken(in DeleteTokenRequest request, ITapAndPayServiceCallbacks callbacks, in ApiMetadata apiMetadata) = 2;
-//    void firstPartyTokenizePan(in FirstPartyTokenizePanRequest request, ITapAndPayServiceCallbacks callbacks, in ApiMetadata apiMetadata) = 3;
+    void firstPartyTokenizePan(in FirstPartyTokenizePanRequest request, ITapAndPayServiceCallbacks callbacks, in ApiMetadata apiMetadata) = 3;
     void setActiveAccount(in SetActiveAccountRequest request, ITapAndPayServiceCallbacks callbacks, in ApiMetadata apiMetadata) = 4;
 
 

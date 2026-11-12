@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 microG Project Team; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="wallet_setup_title">Add payment card</string>
+    <string name="wallet_setup_description">Check your Google account and set up this device’s Wallet connection. Card entry and contactless payment provisioning are still under development.</string>
+    <string name="wallet_setup_check">Check Wallet setup</string>
+    <string name="wallet_setup_register">Register device wallet</string>
+    <string name="wallet_setup_close">Close</string>
+    <string name="wallet_setup_no_accounts">Add a Google account in microG settings, then reopen this screen.</string>
+    <string name="wallet_setup_idle">Select an account to begin.</string>
+    <string name="wallet_setup_checking">Authorizing account and checking Wallet setup…</string>
+    <string name="wallet_setup_registering">Requesting device-wallet registration…</string>
+    <string name="wallet_setup_checked">Account check returned status %1$d. Terms metadata received. Device-wallet registration can now be tested; no card will be added by this step.</string>
+    <string name="wallet_setup_registered">A device-wallet ID was returned by Google and saved for this account. Tap Load saved payment cards to test the Payments client token and retrieve the add-card initialization data. No card has been provisioned yet.</string>
+    <string name="wallet_setup_existing">A device-wallet ID is already saved for this account. Tap Load saved payment cards to continue.</string>
+    <string name="wallet_setup_failed">Setup failed: %1$s</string>
+    <string name="wallet_setup_account_blocked">Google returned account-enablement status 2. Its exact meaning is still being investigated; setup has stopped before device registration.</string>
+    <string name="wallet_setup_terms">Server terms metadata (no acceptance has been submitted):\n\n%1$s</string>
+    <string name="wallet_setup_authorization">Complete Google account authorization, then tap Check Wallet setup again.</string>
+    <string name="wallet_setup_empty_wallet">The registration response did not contain a wallet ID. No successful registration was recorded.</string>
+    <string name="wallet_setup_invalid_account">The selected Google account is no longer available.</string>
+    <string name="wallet_setup_load_cards">Load saved payment cards</string>
+    <string name="wallet_setup_loading_cards">Creating Payments client token and requesting saved cards…</string>
+    <string name="wallet_setup_cards_listed">Received %1$d saved card(s) from Google. Select a card to continue. Contactless tokenization is not implemented yet: it requires device-bound payment-credential cryptography (attestation).</string>
+    <string name="wallet_setup_no_cards">Google returned no saved payment cards for this profile.</string>
+    <string name="wallet_setup_card_ineligible">%1$s (not eligible)</string>
+    <string name="wallet_setup_attest">Test device attestation</string>
+    <string name="wallet_setup_attesting">Fetching nonce and running DroidGuard attestation…</string>
+    <string name="wallet_setup_attested">DroidGuard produced an attestation verdict (%1$d chars). This verdict was not sent anywhere; no card was tokenized. Whether Google accepts it can only be confirmed by a real, consent-gated tokenization.</string>
+    <string name="wallet_setup_saved_card">Saved card %1$d</string>
+    <string name="wallet_setup_review_terms">Review Google Pay terms</string>
+    <string name="wallet_setup_accept_terms">I agree to these Google Pay terms</string>
+    <string name="wallet_setup_accepting_terms">Submitting your Google Pay terms acceptance…</string>
+    <string name="wallet_setup_terms_accepted">Google acknowledged your terms acceptance. You can continue loading saved payment cards.</string>
+    <string name="wallet_setup_terms_recorded">Terms acceptance acknowledged by Google:\n\n%1$s</string>
+</resources>

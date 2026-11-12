@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: 2026 microG Project Team
+// SPDX-License-Identifier: Apache-2.0
+syntax = "proto2";
+package org.microg.gms.tapandpay.backend.proto;
+
+// Recovered from GMS 26.44.32 protobuf-lite message-info strings (same method as
+// wallet_setup.proto). These cover the tapandpay tokenization ATTESTATION primitive only
+// (GET_NONCE + DroidGuard verdict). The full tokenizecard request (iyhp) is the tokenization
+// engine and is intentionally NOT modelled here.
+
+// iyna (t/security/getnonce request) is empty.
+message GetNonceRequest {}
+
+// iynb: newMessageInfo "...\u0001\n" {"b"} -> field 1 is bytes.
+message GetNonceResponse {
+    optional bytes nonce = 1;
+}
+
+// iycv (built by gnnx.c, attached to the tokenize request as iyhp.i).
+// message-info "...\u0001\f\u0002Ȉ\u0003\n\u0004Ȉ\u0005Ȉ\u0006\f" {"b","c","d","e","f","g"}:
+//   1=enum, 2=string, 3=bytes, 4=string, 5=string, 6=enum.
+message AttestationContext {
+    optional int32 type = 1;         // iyct.DROIDGUARD = 2
+    optional string verdict = 2;     // DroidGuard verdict string
+    optional bytes nonce = 3;        // the GET_NONCE bytes the verdict was computed over
+    optional string fingerprint = 5; // Build.FINGERPRINT
+    optional int32 status = 6;       // iycu.STATUS_SUCCESS = 1
+}

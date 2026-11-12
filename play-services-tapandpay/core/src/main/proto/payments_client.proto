@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2026 microG Project Team
+// SPDX-License-Identifier: Apache-2.0
+syntax = "proto2";
+package org.microg.gms.tapandpay.backend.proto;
+
+// GMS 26.44.32 gwdr.b -> jjej: locally encoded, not a bearer credential.
+message PaymentsClientToken {
+    optional PaymentsContext context = 1;
+    optional PaymentsClientConfig config = 2;
+}
+// iewb. Unknown capabilities / nested context messages deliberately omitted.
+message PaymentsContext {
+    optional bytes session_data = 2;
+    optional string locale = 7;
+    optional int32 platform = 8;
+    optional int64 version_code = 9;
+    optional PaymentsDeviceContext android = 10;
+    optional string request_id = 11;
+    optional bool field13 = 13;
+}
+// iesr: subset with semantics confirmed in iaym.b. No SIM/phone identifiers.
+message PaymentsDeviceContext {
+    optional string sdk_version = 3;
+    optional string device = 4;
+    optional int32 screen_width = 5;
+    optional int32 screen_height = 6;
+    optional float xdpi = 7;
+    optional float ydpi = 8;
+    optional string package_name = 9;
+    optional string version_code = 10;
+    optional string version_name = 11;
+    optional string calling_package = 13;
+    optional int32 client_type = 15;
+    optional int32 density_dpi = 28;
+    optional int64 uptime_ms = 35;
+    optional string timezone_name = 36;
+    optional string calling_version_code = 41;
+    optional string gms_version_code = 45;
+    optional string model = 52;
+    optional string brand = 53;
+}
+// jjei: UI values from iffx. Fullscreen = 2; custom tabs not advertised.
+message PaymentsClientConfig {
+    optional string return_url = 1;
+    optional int32 field3 = 3;
+    repeated int32 supported_ui = 4 [packed = false];
+    optional int32 field5 = 5;
+}
+
+// iydg / iydh / iydr / iydp, gowa.a + gohc.getView.
+message ListUntokenizedCardsRequest {
+    optional bytes client_token = 1;
+}
+message ListUntokenizedCardsResponse {
+    repeated UntokenizedCard cards = 1;
+    optional bytes add_card_token = 2;
+    optional bool show_customer_selector = 3;
+    optional bytes customer_selector_params = 5;
+}
+message UntokenizedCard {
+    optional string label = 3;
+    optional bytes edit_token = 4;
+    optional CardEligibility eligibility = 5;
+    optional string instrument_id = 6;
+}
+message CardEligibility {
+    optional int32 status = 1;
+}
+
+// iyss: goxc.a copies the exact terms response fields before submission.
+message UpdateTermsRequest {
+    optional int32 field1 = 1;
+    optional int32 field2 = 2;
+    optional string version_code = 3;
+    optional string locale = 5;
+    optional string document_url = 6;
+    optional int64 android_id = 7;
+}
