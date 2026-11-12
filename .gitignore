@@ -11,3 +11,15 @@ local.properties
 .settings
 .classpath
 .project
+
+# Kotlin compiler session cache
+.kotlin/
+
+# Local RE-effort scratch notes (contain device PII; never commit)
+*_RESUME.md
+
+# Downloaded artifacts dropped in repo root (APKs, bundles, loose logs)
+/*.apk
+/*.apkm
+/*.apks
+/*.log
